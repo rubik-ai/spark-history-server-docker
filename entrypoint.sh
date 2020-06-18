@@ -28,15 +28,15 @@ function usage {
 
   Options:
 
-  --pvc                                                 Enable PVC
-  --gcs gcloudkey                                       Enable GCS and provide the Google Cloud key
-  --s3 enableIAM accessKeyName secretKeyName            Enable S3 and configure whether IAM is enabled,
-                                                        the accessKeyName and secretKeyName
-  --wasbs storageAccountName containerName sasKeyMode \ Enable WASBS and configure its params.
-          sasKeyName(or storageAccountKeyName)          If sasKeyMode=true - provide sasKeyName as last arg,
-                                                        else provide storageAccountKeyName as last arg
-  --events-dir events-dir                               Set events dir
-  -h | --help                                           Prints this message.
+  --pvc                                                   Enable PVC
+  --gcs gcloudkey                                         Enable GCS and provide the Google Cloud key
+  --s3 enableIAM accessKeyName secretKeyName s3Endpoint   Enable S3 and configure whether IAM is enabled,
+                                                          the accessKeyName and secretKeyName
+  --wasbs storageAccountName containerName sasKeyMode \   Enable WASBS and configure its params.
+          sasKeyName(or storageAccountKeyName)            If sasKeyMode=true - provide sasKeyName as last arg,
+                                                          else provide storageAccountKeyName as last arg
+  --events-dir events-dir                                 Set events dir
+  -h | --help                                             Prints this message.
 EOF
 }
 
@@ -67,6 +67,7 @@ function parse_args {
         enableIAM=$2
         accessKeyName=$3
         secretKeyName=$4
+        s3Endpoint=$5
         shift 4
         continue
       else
@@ -159,6 +160,8 @@ elif [[ "$enableGCS" == "true" ]]; then
 elif [[ "$enableS3" == "true" ]]; then
     export SPARK_HISTORY_OPTS="$SPARK_HISTORY_OPTS \
       -Dspark.history.fs.logDirectory=$eventsDir
+      -Dspark.hadoop.fs.s3a.endpoint=${s3Endpoint} \
+      -Dspark.hadoop.fs.s3a.path.style.access=true \
       -Dspark.hadoop.fs.s3a.impl=org.apache.hadoop.fs.s3a.S3AFileSystem";
     if [[ "$enableIAM" == "false" ]]; then
       export SPARK_HISTORY_OPTS="$SPARK_HISTORY_OPTS \
